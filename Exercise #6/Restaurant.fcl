@@ -1,0 +1,75 @@
+FUNCTION_BLOCK restaurant
+
+
+VAR_INPUT
+	restaurantAthmosphere: REAL;
+	foodQuality: REAL;
+	serviceQuality: REAL;
+	location: REAL;
+END_VAR
+
+VAR_OUTPUT
+	institutionAssessment: REAL;
+	foodPrice: REAL;
+END_VAR
+
+
+FUZZIFY restaurantAthmosphere
+	TERM minimum := (0, 1) (60, 0);
+	TERM medium := (50, 0) (70, 1) (90, 0);
+	TERM maximum := (80, 0) (100, 1);
+END_FUZZIFY
+
+FUZZIFY foodQuality
+	TERM bad := (0, 1) (3, 0);
+	TERM medium := (2, 0) (4, 1) (7, 1) (9, 0);
+	TERM good := (8, 0) (10, 1);
+END_FUZZIFY
+
+FUZZIFY serviceQuality
+	TERM bad := (0, 1) (50, 0);
+	TERM medium := (40, 0) (60, 1) (80, 1) (90, 0);
+	TERM good := (80, 0) (100, 1);
+END_FUZZIFY
+
+FUZZIFY location
+	TERM near := (0, 1) (800, 0);
+	TERM medium := (600, 0) (1000, 1) (1800, 1) (2200, 0);
+	TERM far := (2000, 0) (2500, 1);
+END_FUZZIFY
+
+
+DEFUZZIFY institutionAssessment
+	TERM reduceQualityAssessment := (0, 0) (2, 1) (5, 0); 
+	TERM increaseQualityAssessment := (5, 0) (7, 1) (10, 0);
+	METHOD: COG;
+	DEFAULT := 0;
+END_DEFUZZIFY
+
+DEFUZZIFY foodPrice
+	TERM reducePrice := (0, 1) (60, 0);
+	TERM nothing := (50, 0) (70, 1) (90, 0);
+	TERM increasePrice := (80, 0) (100, 1);
+	METHOD: COG;
+	DEFAULT := 0;
+END_DEFUZZIFY
+
+
+RULEBLOCK subway
+	AND: MIN;
+	ACT: MIN;
+	ACCU: MAX;
+	
+	RULE 1: IF restaurantAthmosphere IS medium AND foodQuality IS good AND serviceQuality IS medium AND location IS medium THEN institutionAssessment IS reduceQualityAssessment;
+	RULE 2: IF restaurantAthmosphere IS medium AND foodQuality IS bad AND serviceQuality IS medium AND location IS medium THEN institutionAssessment IS reduceQualityAssessment;
+	RULE 3: IF restaurantAthmosphere IS maximum AND foodQuality IS medium AND serviceQuality IS medium AND location IS medium THEN institutionAssessment IS increaseQualityAssessment;
+	RULE 4: IF restaurantAthmosphere IS minimum AND foodQuality IS bad AND serviceQuality IS medium AND location IS medium THEN institutionAssessment IS reduceQualityAssessment;
+	
+	RULE 5: IF restaurantAthmosphere IS minimum AND foodQuality IS medium AND serviceQuality IS medium AND location IS medium THEN foodPrice IS reducePrice;
+	RULE 6: IF restaurantAthmosphere IS maximum AND foodQuality IS good AND serviceQuality IS medium AND location IS medium THEN foodPrice IS increasePrice;
+	RULE 7: IF restaurantAthmosphere IS minimum AND foodQuality IS good AND serviceQuality IS medium AND location IS medium THEN foodPrice IS increasePrice;
+	RULE 8: IF restaurantAthmosphere IS minimum AND foodQuality IS bad AND serviceQuality IS medium AND location IS medium THEN foodPrice IS reducePrice;
+END_RULEBLOCK
+
+
+END_FUNCTION_BLOCK
